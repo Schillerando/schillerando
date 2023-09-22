@@ -38,32 +38,33 @@ export default {
     },
   },
   async mounted() {
+    this.markers = []
     if (this.data != null || this.companies != null) {
       var startZoom = 17;
       //var startPos = [48.93452321902908, 9.263819092113069];
       var startPos = [48.93522091222182, 9.262719154357912];
 
-      var map = L.map('mapContainer').setView(startPos, startZoom);
-      map.setZoom(startZoom);
+      this.map = L.map('mapContainer').setView(startPos, startZoom);
+      this.map.setZoom(startZoom);
       L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 22,
         minZoom: 16,
         attribution:
           '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-      }).addTo(map);
+      }).addTo(this.map);
 
       if ('geolocation' in navigator) {
         navigator.geolocation.watchPosition((position) => {
           L.circleMarker([
             position.coords.latitude,
             position.coords.longitude,
-          ]).addTo(map);
+          ]).addTo(this.map);
         });
       } else {
         console.log(false);
       }
 
-      map.on('click', (e) => {
+      this.map.on('click', (e) => {
         console.log(e.latlng);
       });
     } else {
@@ -72,56 +73,65 @@ export default {
       console.log('Illegal positions-data');
     }
 
-    if (this.data != null) {
-      this.data.forEach(async (pinData) => {
-        console.log(pinData);
-        var icon = await this.buildIcon(pinData.image);
+    if (this.data != undefined && this.data != null) {
+      this.data.forEach((pinData) => {
+        var icon = this.buildIcon(pinData.image);
 
-        L.marker([pinData.position[0], pinData.position[1]], {
+        L.marker(pinData.position, {
           icon: icon,
-        }).addTo(map);
+        }).addTo(this.map);
       });
     }
-
-    if (this.companies != null) {
-      this.companies.forEach(async (company) => {
-        if (company.coordinates != undefined && company.coordinates != null) {
-          var image = null;
-
-          if (
-            company.header_picture != undefined &&
-            company.header_picture != null
-          ) {
-            const response = await supabase.storage
-              .from('public/sellers-headings')
-              .download(company.header_picture);
-
-            if (response.data != null) {
-              image = await response.data.text();
-            }
-            if (response.error) console.warn(response.error);
-          }
-
-          var icon = await this.buildIcon(image);
-
-          L.marker([company.coordinates[0], company.coordinates[1]], {
-            icon: icon,
-          })
-            .addTo(map)
-            .on('click', () => {
-              var newCompany = company;
-              newCompany.image = image;
-              this.$emit('pickCompany', newCompany);
-            });
-        }
-      });
-    }
+    this.companiesToMap()
   },
   methods: {
+    companiesToMap() {
+      for (var i = 0; i < this.markers.length; i++) {
+        this.map.removeLayer(this.markers[i]);
+      }
+      this.markers = []
+      if (this.companies != null) {
+        console.log(this.companies)
+        this.companies.forEach(async (company) => {
+          if (company.coordinates != undefined && company.coordinates != null) {
+            var image = null;
+
+            if (
+              company.header_picture != undefined &&
+              company.header_picture != null
+            ) {
+              const response = await supabase.storage
+                .from('public/sellers-headings')
+                .download(company.header_picture);
+
+              if (response.data != null) {
+                image = await response.data.text();
+              }
+              if (response.error) console.warn(response.error);
+            }
+
+            var icon = this.buildIcon(image);
+
+            let marker = L.marker([company.coordinates[0], company.coordinates[1]], {
+              icon: icon,
+            })
+            this.markers.push(marker)
+
+            marker.addTo(this.map)
+              .on('click', () => {
+                var newCompany = company;
+                newCompany.image = image;
+                this.$emit('pickCompany', newCompany);
+              });
+          }
+        });
+        console.log(this.markers)
+      }
+    },
     onMapClick(e) {
       console.log(e);
     },
-    async buildIcon(image) {
+    buildIcon(image) {
       var canvas = document.getElementById('test');
       var ctx = canvas.getContext('2d');
 
@@ -134,11 +144,6 @@ export default {
         return icon;
       }
 
-      await new Promise((resolve) => setTimeout(resolve, 50));
-
-      var logo = new Image();
-      logo.src = image;
-
       ctx.drawImage(this.pin, 0, 0, 145, 225);
 
       var width = 135;
@@ -150,6 +155,9 @@ export default {
       ctx.arc(x + width / 2, y + height / 2, width / 2, 0, 10);
 
       ctx.clip();
+
+      var logo = new Image();
+      logo.src = image;
 
       if (logo.width > logo.height) {
         var scale = logo.height / width;
@@ -178,6 +186,11 @@ export default {
       });
       return icon;
     },
+  },
+  watch: {
+    companies() {
+      this.companiesToMap()
+    }
   },
 };
 </script>

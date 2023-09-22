@@ -1,41 +1,5 @@
 <template>
   <TitleDiv title="Unternehmen" />
-  <div class="row">
-    <div class="col col-xl-1 col-xxl-2 big"></div>
-
-    <div v-if="!loading" class="col col-lg-6 col-xl-5 col-xxl-4">
-      <div class="mapWrapper">
-        <MapProvider
-          @pickCompany="pickCompany($event)"
-          class="map"
-          :companies="companies"
-        />
-      </div>
-    </div>
-
-    <div
-      v-if="companies.length > 0"
-      class="col col-lg-6 col-xl-5 col-xxl-4 big"
-    >
-      <div class="company">
-        <CompanyTile
-          :no-margin="true"
-          :data="
-            pickedCompany == null
-              ? companies[companies.findIndex((c) => c.alias == 'schillerando')]
-              : pickedCompany
-          "
-        />
-      </div>
-    </div>
-
-    <div v-if="pickedCompany != null" id="company" class="small">
-      <div class="company">
-        <CompanyTile :data="pickedCompany" :no-margin="true" />
-      </div>
-    </div>
-  </div>
-
   <SortableList :items="companies" :loading="loading" element="CompanyTile" />
   <div
     v-if="loading"
@@ -48,8 +12,6 @@
 </template>
 
 <script>
-import CompanyTile from '@/components/CompanyTile.vue';
-import MapProvider from '@/components/MapProvider.vue';
 import SortableList from '@/components/SortableList.vue';
 import { supabase } from '@/supabase';
 import TitleDiv from '../components/TitleDiv';
@@ -59,8 +21,6 @@ export default {
   components: {
     TitleDiv,
     SortableList,
-    MapProvider,
-    CompanyTile,
   },
   data() {
     return {
@@ -81,7 +41,7 @@ export default {
     this.loading = false;
   },
   methods: {
-    async pickCompany(company) {
+    /*async pickCompany(company) {
       this.pickedCompany = company;
 
       await new Promise((resolve) => setTimeout(resolve, 100));
@@ -95,7 +55,7 @@ export default {
         block: 'end',
         inline: 'nearest',
       });
-    },
+    },*/
   },
 };
 </script>

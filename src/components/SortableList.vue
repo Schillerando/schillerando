@@ -104,6 +104,9 @@
       </div>
     </div>
   </div>
+
+  <CompanyMap v-if="(this.element == 'CompanyTile') && (this.chosenCategories[0] !== 'Kultur')" :companies="shownItems" />
+
   <div class="sortable-list" ref="sortableList">
     <div v-for="ssItem in sortedShownItems" v-bind:key="ssItem.id">
       <component
@@ -128,11 +131,17 @@
 /* eslint-disable no-unused-vars */
 import ProductTile from './ProductTile.vue';
 import CompanyTile from './CompanyTile.vue';
+import CompanyMap from './CompanyMap.vue';
 import router from '@/router';
 /* eslint-enable no-unused-vars */
 
 export default {
   name: 'SortableList',
+  components: {
+    ProductTile,
+    CompanyTile,
+    CompanyMap,
+  },
   data() {
     return {
       categories: [],
@@ -335,7 +344,6 @@ export default {
       this.generateShownItems();
     },
   },
-  components: { ProductTile, CompanyTile },
 };
 </script>
 
