@@ -40,7 +40,7 @@ export default {
   async mounted() {
     if (this.data != null || this.companies != null) {
       var mapWidth = document.getElementById('mapContainer');
-      console.log(mapWidth.clientWidth);
+      console.log('[Map provider] client width', mapWidth.clientWidth);
 
       if (mapWidth.clientWidth < 450) {
         var startZoom = 17;

@@ -1,58 +1,46 @@
 <template>
-  <TitleDiv title="Unternehmen" />
-  <div class="row">
-    <div class="col col-xl-1 col-xxl-2 big"></div>
+  <CompanyDetailView v-if="showDetails !== null" class="overlay" :companyalias="showDetails" />
+  <div >
+    <TitleDiv title="Unternehmen" />
+    <div class="row">
+      <div class="col col-xl-1 col-xxl-2 big"></div>
 
-    <div v-if="!loading" class="col col-lg-6 col-xl-5 col-xxl-4">
-      <div class="mapWrapper">
-        <MapProvider
-          @pickCompany="pickCompany($event)"
-          class="map"
-          :companies="companies"
-        />
+      <div v-if="!loading" class="col col-lg-6 col-xl-5 col-xxl-4">
+        <div class="mapWrapper">
+          <MapProvider @pickCompany="pickCompany($event)" class="map" :companies="companies" />
+        </div>
+      </div>
+
+      <div v-if="companies.length > 0" class="col col-lg-6 col-xl-5 col-xxl-4 big">
+        <div class="company">
+          <CompanyTile :no-margin="true" :data="pickedCompany == null
+            ? companies[companies.findIndex((c) => c.alias == 'schillerando')]
+            : pickedCompany
+            " />
+        </div>
+      </div>
+
+      <div v-if="pickedCompany != null" id="company" class="small">
+        <div class="company">
+          <CompanyTile :data="pickedCompany" :no-margin="true" />
+        </div>
       </div>
     </div>
 
-    <div
-      v-if="companies.length > 0"
-      class="col col-lg-6 col-xl-5 col-xxl-4 big"
-    >
-      <div class="company">
-        <CompanyTile
-          :no-margin="true"
-          :data="
-            pickedCompany == null
-              ? companies[companies.findIndex((c) => c.alias == 'schillerando')]
-              : pickedCompany
-          "
-        />
-      </div>
+    <SortableList :items="companies" :loading="loading" element="CompanyTile" />
+    <div v-if="loading" class="spinner-border" style="width: 4rem; height: 4rem; border-width: 7px" role="status">
+      <span class="visually-hidden">Loading...</span>
     </div>
-
-    <div v-if="pickedCompany != null" id="company" class="small">
-      <div class="company">
-        <CompanyTile :data="pickedCompany" :no-margin="true" />
-      </div>
-    </div>
-  </div>
-
-  <SortableList :items="companies" :loading="loading" element="CompanyTile" />
-  <div
-    v-if="loading"
-    class="spinner-border"
-    style="width: 4rem; height: 4rem; border-width: 7px"
-    role="status"
-  >
-    <span class="visually-hidden">Loading...</span>
   </div>
 </template>
 
 <script>
+import { supabase } from '@/supabase';
 import CompanyTile from '@/shared/components/CompanyTile.vue';
+import TitleDiv from '@/shared/components/TitleDiv';
 import MapProvider from '@/components/MapProvider.vue';
 import SortableList from '@/components/SortableList.vue';
-import { supabase } from '@/supabase';
-import TitleDiv from '@/shared/components/TitleDiv';
+import CompanyDetailView from './CompanyDetailView.vue';
 
 export default {
   name: 'CompanyView',
@@ -61,15 +49,19 @@ export default {
     SortableList,
     MapProvider,
     CompanyTile,
+    CompanyDetailView
   },
   data() {
     return {
       companies: [],
       pickedCompany: null,
       loading: true,
+      showDetails: null
     };
   },
   async created() {
+    if (this.$route.params.companyalias !== undefined) this.$data.showDetails = this.$route.params.companyalias
+
     const { data, error } = await supabase
       .from('companies')
       .select()
@@ -79,6 +71,16 @@ export default {
     this.companies = data;
 
     this.loading = false;
+
+    document.addEventListener('openDetailView', (e) => {
+      console.log('[Company View] opening new company', e.detail)
+      this.$data.showDetails = e.detail
+    })
+
+    document.addEventListener('dismissDetailView', () => {
+      console.log('[Company View] dismiss detail view')
+      this.$data.showDetails = null
+    })
   },
   methods: {
     async pickCompany(company) {
@@ -101,6 +103,14 @@ export default {
 </script>
 
 <style>
+.site {
+  position: absolute;
+  width: 100vw;
+  top: 50px;
+  height: calc(100% - 50px);
+  overflow-y: hidden;
+}
+
 .spinner-border {
   color: #00a100;
 }
@@ -195,6 +205,41 @@ export default {
 
   .company {
     padding: 0 12px 0 12px;
+  }
+}
+
+.overlay {
+  background-color: white;
+  position: fixed;
+  top: 50px;
+  z-index: 2000;
+  padding: 25px;
+  margin-top: 25px;
+  margin-left: calc(50% - 50em - 25px);
+  margin-right: calc(50% - 50em - 25px);
+  margin-bottom: 25px;
+  width: 100vw;
+  max-width: 100em;
+  height: calc(100vh - 100px);
+  border-radius: 30px;
+  overflow: scroll;
+}
+
+@media (max-width: 100em) {
+  .overlay {
+    margin-left: 0;
+    margin-right: 0;
+    margin-bottom: 0;
+    height: calc(100vh - 75px);
+    border-radius: 30px 30px 0 0;
+  }
+}
+
+@media (max-height: 35em) {
+  .overlay {
+    margin-bottom: 0;
+    height: calc(100vh - 75px);
+    border-radius: 30px 30px 0 0;
   }
 }
 </style>

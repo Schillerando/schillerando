@@ -1,12 +1,18 @@
 <template>
   <div class="outer">
-    <div v-if="this.company === undefined" class="spinner-border" style="
+    <button @click="goBack">Zurück</button>
+    <div
+      v-if="this.company === undefined"
+      class="spinner-border"
+      style="
         width: 4rem;
         height: 4rem;
         border-width: 7px;
         position: relative;
         margin-top: 50px;
-      " role="status">
+      "
+      role="status"
+    >
       <span class="visually-hidden">Loading...</span>
     </div>
     <div v-else-if="this.company === null" class="mt-4">
@@ -21,7 +27,12 @@
           <div v-if="this.image == null" class="no-image">
             <i class="fa-solid fa-image fa-2xl"></i>
           </div>
-          <img v-else :src="this.image" alt="Unternehmen Bild" id="companyImage" />
+          <img
+            v-else
+            :src="this.image"
+            alt="Unternehmen Bild"
+            id="companyImage"
+          />
         </div>
 
         <div class="detail-wrapper">
@@ -31,8 +42,12 @@
                 {{ this.company.name }}
               </h1>
               <div class="col-2">
-                <CompanyBadge :verified="this.company.verified" :premium="this.company.abo == 'Business'"
-                  :self="this.company.alias == 'schillerando'" class="company-badge" />
+                <CompanyBadge
+                  :verified="this.company.verified"
+                  :premium="this.company.abo == 'Business'"
+                  :self="this.company.alias == 'schillerando'"
+                  class="company-badge"
+                />
               </div>
             </div>
 
@@ -52,22 +67,26 @@
                 <div class="location-text">
                   {{ company.location }}&nbsp;&nbsp;&nbsp;&nbsp;
                 </div>
-                <a v-if="company.socials.instagram !== undefined &&
-                  this.company.socials.instagram != ''
-                  " :href="company.socials.instagram" class="insta"><i class="fa-brands fa-instagram fa-lg"></i></a>
+                <a
+                  v-if="
+                    company.socials.instagram !== undefined &&
+                    this.company.socials.instagram != ''
+                  "
+                  :href="company.socials.instagram"
+                  class="insta"
+                  ><i class="fa-brands fa-instagram fa-lg"></i
+                ></a>
               </div>
             </div>
           </div>
         </div>
 
         <div>
-          <div>
-            <div v-if="company.pinData != undefined &&
-              company.coordinates.length == 2 &&
-              !loading
-              " class="mapWrapper">
-              <MapProvider :data="company.pinData" class="map" />
-            </div>
+          <div
+            v-if="company.pinData != undefined && !loading"
+            class="mapWrapper"
+          >
+            <MapProvider :data="company.pinData" class="map" />
           </div>
         </div>
 
@@ -75,8 +94,14 @@
       </div>
 
       <div class="products col-lg-7 col-xl-8">
-        <SortableList v-if="products.length > 0" :items="products" :no-search="true" sort-by-categories="true"
-          show-category="true" element="ProductTile" />
+        <SortableList
+          v-if="products.length > 0"
+          :items="products"
+          :no-search="true"
+          sort-by-categories="true"
+          show-category="true"
+          element="ProductTile"
+        />
 
         <h4 v-else class="margin">
           Dieses Unternehmen bietet keine Produkte, Aktivitäten oder
@@ -88,7 +113,6 @@
 </template>
 
 <script>
-import router from '@/router';
 import { supabase } from '@/supabase';
 import CompanyBadge from '@/shared/components/CompanyBadge.vue';
 import SortableList from '@/components/SortableList.vue';
@@ -96,7 +120,7 @@ import MapProvider from '@/components/MapProvider.vue';
 
 export default {
   name: 'CompanyDetailView',
-  props: ['companyuuid'],
+  props: ['companyuuid', 'companyalias'],
   components: { CompanyBadge, SortableList, MapProvider },
   data() {
     return {
@@ -107,31 +131,21 @@ export default {
     };
   },
   async mounted() {
-    if (this.$route.params.companyalias) {
-      let { data, error } = await supabase
+    let alias = null
+    if (this.$route.params.companyalias) {alias = this.$route.params.companyalias}
+    if (this.$props.companyalias) {alias = this.$props.companyalias}
+    if (alias) {
+      console.log('[CompanyDetailView] companyalias', alias)
+      const { data, error } = await supabase
         .from('companies')
         .select()
-        .eq('alias', this.$route.params.companyalias);
-      if (error !== null) console.log(error);
-      if (data !== null && data.length !== 0) {
-        this.company = data[0];
-        console.log('Opening company by alias', this.company.alias);
-      } else {
-        let { data, error } = await supabase
-          .from('companies')
-          .select()
-          .contains('redirect_aliases', [this.$route.params.companyalias]);
-        if (error !== null) console.log(error);
-        if (data !== null && data.length !== 0) {
-          this.company = data[0];
-          console.log('Opening company by redirect alias ' + this.$route.params.companyalias + ' redirecting to ' + this.company.alias);
-          router.replace('/' + this.company.alias)
-        } else {
-          console.log('Company ' + this.$route.params.companyalias + ' not found')
-          this.company = null;
-          return;
-        }
+        .eq('alias', alias);
+      if (error != null) console.log(error);
+      if (data === null || data.length === 0) {
+        this.company = null;
+        return;
       }
+      this.company = data[0];
 
       if (this.company.header_picture != null) {
         const response = await supabase.storage
@@ -188,6 +202,13 @@ export default {
         'https://instagram.com/' + this.company.socials.instagram;
 
     this.loading = false;
+  },
+  methods: {
+    goBack() {
+      history.pushState({}, null, process.env.VUE_APP_MAIN_URL + '/unternehmen')
+      const event = new CustomEvent('dismissDetailView');
+      document.dispatchEvent(event);
+    }
   },
 };
 </script>

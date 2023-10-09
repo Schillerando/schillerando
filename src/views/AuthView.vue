@@ -413,9 +413,8 @@ export default {
     };
   },
   mounted() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const actionQuery = urlParams.get('action');
-    console.log(actionQuery)
+    const actionQuery = this.$route.query.action;
+    console.log('Auth action query (register?)', this.$route.query.action);
     if (actionQuery === "register") this.flipCard()
   },
   methods: {
@@ -494,7 +493,7 @@ export default {
       this.form.email = document.getElementById('login-mail').value;
       this.form.password = document.getElementById('login-passwd').value;
 
-      console.log(this.$route.query.redirect);
+      console.log('Redirect route', this.$route.query.redirect);
       this.store.dispatch('signInAction', {
         form: this.form,
         path: this.$route.query.redirect,

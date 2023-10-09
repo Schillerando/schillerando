@@ -109,6 +109,7 @@
       <component
         :is="element"
         :data="ssItem"
+        :linkViaEvent="element === 'CompanyTile'"
         :show-category="this.showCategory"
         class="item"
       ></component>

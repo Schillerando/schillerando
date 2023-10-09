@@ -9,7 +9,7 @@ import AccountView from '../views/AccountView';
 import AuthView from '../views/AuthView';
 import UpdatePasswordView from '../views/UpdatePasswordView';
 import AGBView from '../views/AGBView';
-import CompanyDetailView from '../views/CompanyDetailView';
+//import CompanyDetailView from '../views/CompanyDetailView';
 import ProductDetailView from '../views/ProductDetailView';
 
 const routes = [
@@ -68,7 +68,7 @@ const routes = [
   },
   {
     path: '/:companyalias',
-    component: CompanyDetailView,
+    component: CompanyView,
     meta: {
       footer: false,
     },
@@ -105,7 +105,7 @@ router.beforeEach((to, from, next) => {
     let query = to.query;
     store.dispatch('addQRCodeCount', to.query.source);
     delete query.source;
-    next({ query: query, path: to.path });
+    next({ query: query });
   } else if (to.path === '/' && user !== null) {
     //Logged in users get 'products' page as start-page
     next({ path: 'angebote' });
