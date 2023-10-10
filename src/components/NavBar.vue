@@ -127,7 +127,7 @@ export default {
   text-align: left;
   background-color: white;
 
-  z-index: 1500;
+  z-index: 999;
 }
 
 .navbar-brand {
