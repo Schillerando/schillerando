@@ -23,7 +23,7 @@
         <button
           v-if="data.delivery"
           class="btn btn-primary"
-          @click.prevent="addProductToCart"
+          @click="addProductToCart"
           type="button"
           disabled
         >
@@ -64,9 +64,7 @@ export default {
     }
   },
   methods: {
-    addProductToCart(event) {
-      event.stopPropagation()
-
+    addProductToCart() {
       if (this.store.getters.getUser == null)
         router.push({ path: 'auth', query: { redirect: 'angebote' } });
       this.store.commit('addProductToCart', this.data);
@@ -122,8 +120,6 @@ export default {
   bottom: 8px;
   left: 15px;
   color: black;
-  background-color: white;
-  width: 100%;
 }
 
 .row {

@@ -23,20 +23,9 @@ const store = createStore({
     },
     addProductToCart(state, payload) {
       state.shoppingCart.push(payload);
-
-      state.shoppingCart.sort((a, b) => a.name.localeCompare(b.name));
     },
     removeProductFromCart(state, payload) {
-      state.shoppingCart = state.shoppingCart.filter(
-        (product) => product.id != payload.id
-      );
-    },
-    removeOneProductFromCart(state, payload) {
-      const index = state.shoppingCart.findIndex((product) => {
-        return product.id == payload.id;
-      });
-
-      state.shoppingCart.splice(index, 1);
+      state.shoppingCart.filter((product) => product.id != payload.id);
     },
     setRegistered(state, payload) {
       state.registered = payload;
