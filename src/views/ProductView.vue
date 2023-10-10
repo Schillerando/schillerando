@@ -21,7 +21,7 @@
 <script>
 import SortableList from '@/components/SortableList.vue';
 import { supabase } from '@/supabase';
-import TitleDiv from '../components/TitleDiv';
+import TitleDiv from '@/shared/components/TitleDiv';
 
 export default {
   name: 'ProductView',

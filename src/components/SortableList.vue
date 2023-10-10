@@ -127,7 +127,7 @@
 <script>
 /* eslint-disable no-unused-vars */
 import ProductTile from './ProductTile.vue';
-import CompanyTile from './CompanyTile.vue';
+import CompanyTile from '@/shared/components/CompanyTile.vue';
 import router from '@/router';
 /* eslint-enable no-unused-vars */
 
@@ -157,8 +157,8 @@ export default {
   methods: {
     sort: function () {
       this.sortedShownItems = this.shownItems;
+      this.shuffleArray(this.sortedShownItems);
       if (this.sortBy == '') {
-        this.shuffleArray(this.sortedShownItems);
         return;
       } else if (this.sortBy == 'category') {
         const categoryOrder = [
@@ -172,7 +172,6 @@ export default {
         ];
 
         for (var i = 0; i < this.sortedShownItems.length; i++) {
-          console.log(this.sortedShownItems[i].categories[0]);
           this.sortedShownItems[i].category = categoryOrder.indexOf(
             this.sortedShownItems[i].categories[0]
           );

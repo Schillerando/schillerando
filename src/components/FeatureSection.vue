@@ -63,7 +63,7 @@
         :forCompanies="true"
         image="service.png"
         title="Services"
-        text="Lasse dir vor und während Schule als Staat Ware für dein Unternehmen aus dem Ausland liefern, deinen Müll entsorgen und vieles mehr."
+        text="Lasse dir vor und während Schule als Staat Ware für dein Unternehmen aus dem Ausland liefern oder deinen Müll entsorgen."
         :link="businessUrl + '/services?ext=true'"
         linkTitle="Services"
       ></FeatureTile>

@@ -7,8 +7,8 @@
 </template>
 
 <script>
-import AlertBanner from '../components/AlertBanner';
-import TitleDiv from '../components/TitleDiv';
+import AlertBanner from '@/shared/components/AlertBanner';
+import TitleDiv from '@/shared/components/TitleDiv';
 import InfoDiv from '../components/InfoDiv';
 
 export default {

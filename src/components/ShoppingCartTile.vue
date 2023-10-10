@@ -1,37 +1,30 @@
 <template>
-  <router-link :to="link" class="link">
-    <div class="card">
-      <div class="image">
-        <div v-if="this.image == null" class="no-image">
-          <i class="fa-solid fa-image fa-2xl"></i>
-        </div>
-        <img v-else :src="this.image" alt="Produkt Bild" />
+  <div class="card">
+    <div class="image">
+      <div v-if="this.image == null" class="no-image">
+        <i class="fa-solid fa-image fa-2xl"></i>
       </div>
-      <div class="info">
-        <div>
-          <p class="name">{{ data.name }}</p>
-        </div>
-        <div>
-          <p v-if="showCategory" class="company_name">
-            {{ data.categories[0] }}
-          </p>
-          <p v-else class="company_name">{{ data.company.name }}</p>
-        </div>
+      <img v-else :src="this.image" alt="Produkt Bild" />
+    </div>
+    <div class="info">
+      <div>
+        <p class="name">{{ data.name }}</p>
+      </div>
+      <div>
+        <p class="company_name">{{ data.company.name }}</p>
+      </div>
 
-        <p class="price">{{ data.price }} $</p>
+      <p class="price">{{ data.price }} $</p>
 
-        <button
-          v-if="data.delivery"
-          class="btn btn-primary"
-          @click.prevent="addProductToCart"
-          type="button"
-          disabled
-        >
-          <i class="fa-solid fa-cart-plus fa-lg"></i>
-        </button>
+      <div v-if="product != null" class="input-group input-group-sm count">
+        <button v-if="product.count == 1" @click="countDown(true)" class="input-group-text"><i color="red" class="fa-solid fa-trash-can"></i></button>
+        <button v-else @click="countDown" class="input-group-text">-</button>
+        <input disabled id="countInput" style="background-color: white;" :value="product.count" type="number" class="form-control" aria-label="Anzahl an Produkten" min="1" max="9">
+        <button v-if="product.count == 9" class="input-group-text">&nbsp;&nbsp;&nbsp;</button>
+        <button v-else :disabled="product.count >= 9" @click="countUp" class="input-group-text">+</button>
       </div>
     </div>
-  </router-link>
+  </div>
 </template>
 
 <script>
@@ -40,8 +33,8 @@ import { useStore } from 'vuex';
 import { supabase } from '../supabase';
 
 export default {
-  name: 'ProductTile',
-  props: ['data', 'showCategory'],
+  name: 'ShoppingCartTile',
+  props: ['data'],
   setup() {
     const store = useStore();
 
@@ -52,9 +45,12 @@ export default {
   data() {
     return {
       image: null,
+      product: null
     };
   },
   async mounted() {
+    this.product = this.data
+
     if (this.data.product_picture != null) {
       const response = await supabase.storage
         .from('public/products-pictures')
@@ -68,14 +64,27 @@ export default {
       event.stopPropagation()
 
       if (this.store.getters.getUser == null)
-        router.push({ path: 'auth', query: { redirect: 'angebote' } });
+        router.push({ path: 'auth', query: { redirect: 'produkte' } });
       this.store.commit('addProductToCart', this.data);
     },
-  },
-  computed: {
-    link() {
-      return `/${this.data.company.alias}/${this.data.id}`;
+    countUp() {
+      this.product.count++
+
+      console.log(this.product.count)
+
+      if(this.product.count > 9) this.product.count = 9
+      else this.store.commit('addProductToCart', this.data)
+
+
     },
+    countDown(remove) {
+      this.product.count--
+
+      console.log(this.product.count)
+
+      if(this.product.count < 1 && !remove) this.product.count = 1
+      else this.store.commit('removeOneProductFromCart', this.data)
+    }
   },
 };
 </script>
@@ -122,8 +131,6 @@ export default {
   bottom: 8px;
   left: 15px;
   color: black;
-  background-color: white;
-  width: 100%;
 }
 
 .row {
@@ -195,6 +202,24 @@ img {
   top: 50%;
   left: calc(50% - 2rem);
   color: black;
+}
+
+.count {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  width: 78px;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
 }
 
 /*   border-radius: 0.375rem 0 0 0.375rem; */

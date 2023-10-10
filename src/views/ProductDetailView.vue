@@ -176,6 +176,13 @@ import { useStore } from 'vuex';
 export default {
   name: 'ProductDetailView',
   props: ['companyuuid'],
+  setup() {
+    const store = useStore()
+
+    return {
+      store
+    }
+  },
   data() {
     return {
       product: undefined,
@@ -286,6 +293,15 @@ export default {
       }
     },
   },
+  methods: {
+    addProductToCart() {
+      console.log(this.$route.path)
+
+      if (this.store.getters.getUser == null)
+        this.$router.push({ path: 'auth', query: { redirect: this.$route.path } });
+      this.store.commit('addProductToCart', this.product)
+    }
+  }
   components: { ReviewTile },
 };
 </script>
