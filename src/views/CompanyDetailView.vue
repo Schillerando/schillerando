@@ -1,6 +1,8 @@
 <template>
   <div class="outer">
-    <button @click="goBack">Zurück</button>
+    <button class="btn btn-primary back" @click="goBack">
+      <i class="fa-solid fa-arrow-left fa-xl"></i>
+    </button>
     <div
       v-if="this.company === undefined"
       class="spinner-border"
@@ -131,11 +133,15 @@ export default {
     };
   },
   async mounted() {
-    let alias = null
-    if (this.$route.params.companyalias) {alias = this.$route.params.companyalias}
-    if (this.$props.companyalias) {alias = this.$props.companyalias}
+    let alias = null;
+    if (this.$route.params.companyalias) {
+      alias = this.$route.params.companyalias;
+    }
+    if (this.$props.companyalias) {
+      alias = this.$props.companyalias;
+    }
     if (alias) {
-      console.log('[CompanyDetailView] companyalias', alias)
+      console.log('[CompanyDetailView] companyalias', alias);
       const { data, error } = await supabase
         .from('companies')
         .select()
@@ -155,7 +161,8 @@ export default {
           this.image = await response.data.text();
           if (
             this.company.coordinates != undefined &&
-            this.company.coordinates != null
+            this.company.coordinates != null &&
+            this.company.coordinates.length == 2
           )
             this.company.pinData = [
               { position: this.company.coordinates, image: this.image },
@@ -205,10 +212,14 @@ export default {
   },
   methods: {
     goBack() {
-      history.pushState({}, null, process.env.VUE_APP_MAIN_URL + '/unternehmen')
+      history.pushState(
+        {},
+        null,
+        process.env.VUE_APP_MAIN_URL + '/unternehmen'
+      );
       const event = new CustomEvent('dismissDetailView');
       document.dispatchEvent(event);
-    }
+    },
   },
 };
 </script>
@@ -380,5 +391,15 @@ img {
   .spacer {
     position: relative;
   }
+}
+
+.back {
+  z-index: 1500;
+  position: fixed;
+  top: 85px;
+  left: 10px;
+  border-radius: 100%;
+  height: 50px;
+  width: 50px;
 }
 </style>
