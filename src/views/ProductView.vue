@@ -37,22 +37,61 @@ export default {
     };
   },
   async created() {
-    const { data, error } = await supabase
-      .from('products')
-      .select(`*, company:companies(name, abo, alias, verified)`)
-      .eq('public', true);
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .select(`*, company:companies(name, abo, alias, verified)`)
+        .eq('public', true);
 
-    if (error != null) console.log(error);
+      if (error) throw error;
 
-    var filtered = [];
-    data.forEach((product) => {
-      if (product.company.abo != null && product.company.verified)
-        filtered.push(product);
-    });
+      var filtered = [];
+      data.forEach((product) => {
+        if (product.company.abo != null && product.company.verified) {
+          product.reviews = [];
+          filtered.push(product);
+        }
+      });
 
-    this.products = filtered;
+      this.products = filtered;
 
-    this.loading = false;
+      {
+        const { data, error } = await supabase
+          .from('product_reviews')
+          .select(`*`);
+
+        if (error) throw error;
+
+        data.forEach((review) => {
+          var index = this.products.findIndex(
+            (product) => product.id == review.product
+          );
+
+          if (index != -1) {
+            this.products[index].reviews.push(review);
+          }
+        });
+
+        var i = 0;
+        this.products.forEach((product) => {
+          if (product.reviews.length > 0) {
+            var stars = 0;
+            product.reviews.forEach((review) => {
+              stars += review.stars;
+            });
+            this.products[i].stars =
+              Math.round((stars / product.reviews.length) * 10) / 10;
+          } else {
+            this.products[i].stars = 0;
+          }
+          i++;
+        });
+      }
+
+      this.loading = false;
+    } catch (e) {
+      console.log(e);
+    }
   },
 };
 </script>

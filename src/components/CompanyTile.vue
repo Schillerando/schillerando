@@ -30,6 +30,13 @@
             <div class="location-text">{{ data.location }}</div>
           </div>
         </div>
+
+        <div v-if="data.stars > 0" class="product-stars">
+          <div>
+            <span class="average">{{ data.stars }}</span>
+            <i class="fa-solid fa-star fa-xl solid-star"></i>
+          </div>
+        </div>
       </div>
     </div>
   </router-link>
@@ -152,5 +159,31 @@ img {
   top: 50%;
   left: calc(50% - 3rem);
   color: black;
+}
+
+.product-stars {
+  position: absolute;
+  right: 6px;
+  bottom: 9px;
+}
+
+.average {
+  color: black;
+  font-size: 1.3rem;
+  position: relative;
+  top: 2px;
+  margin-right: 5px;
+}
+
+.fa-star {
+  margin-right: 5px;
+}
+
+.solid-star {
+  color: #e3c100;
+}
+
+.stars {
+  display: flex;
 }
 </style>

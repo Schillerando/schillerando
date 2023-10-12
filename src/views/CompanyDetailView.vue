@@ -60,10 +60,18 @@
               </p>
             </div>
 
-            <div class="row spacing location-pos">
+            <div class="spacing location-pos">
               <div class="col-9 location">
                 <i class="fa-solid fa-location-dot"></i>
                 <div class="location-text">{{ company.location }}</div>
+              </div>
+
+              <div class="product-stars">
+                <div>
+                  <span class="average" v-if="total_stars == 0">-</span>
+                  <span class="average" v-else>{{ total_stars }}</span>
+                  <i class="fa-solid fa-star fa-xl solid-star"></i>
+                </div>
               </div>
             </div>
           </div>
@@ -72,7 +80,7 @@
         <hr />
       </div>
 
-      <div class="products col-lg-7 col-xl-8">
+      <div v-if="!loading" class="products col-lg-7 col-xl-8">
         <SortableList
           v-if="products.length > 0"
           :items="products"
@@ -82,7 +90,8 @@
           element="ProductTile"
         />
         <h4 v-else class="margin">
-          Dieses Unternehmen bietet keine Produkte, Aktivitäten oder Dienstleistungen auf Schillerando an.
+          Dieses Unternehmen bietet keine Produkte, Aktivitäten oder
+          Dienstleistungen auf Schillerando an.
         </h4>
       </div>
     </div>
@@ -103,6 +112,8 @@ export default {
       company: undefined,
       image: null,
       products: [],
+      loading: true,
+      total_stars: 0,
     };
   },
   async mounted() {
@@ -139,10 +150,57 @@ export default {
           });
         }
 
-        console.log(this.products);
-
         if (response.error) console.warn(response.error);
+
+        {
+          const { data, error } = await supabase
+            .from('product_reviews')
+            .select()
+            .eq('company', this.company.id);
+
+          if (error) console.warn(response.error);
+
+          data.forEach((review) => {
+            var index = this.products.findIndex(
+              (product) => product.id == review.product
+            );
+
+            if (index != -1) {
+              if (this.products[index].reviews == undefined) {
+                this.products[index].reviews = [];
+              }
+
+              this.products[index].reviews.push(review);
+            }
+          });
+
+          var i = 0;
+          var count = 0;
+          this.products.forEach((product) => {
+            if (product.reviews != undefined && product.reviews.length > 0) {
+              var stars = 0;
+              product.reviews.forEach((review) => {
+                stars += review.stars;
+              });
+              this.products[i].stars =
+                Math.round((stars / product.reviews.length) * 10) / 10;
+
+              this.total_stars += this.products[i].stars;
+              count++;
+            } else {
+              this.products[i].stars = 0;
+            }
+            i++;
+          });
+
+          if (count > 0)
+            this.total_stars = Math.round((this.total_stars / count) * 10) / 10;
+        }
       }
+
+      console.log(this.products);
+
+      this.loading = false;
     }
   },
 };
@@ -288,5 +346,35 @@ img {
   .spacer {
     position: relative;
   }
+}
+
+.product-stars {
+  position: absolute;
+  right: 25px;
+  bottom: -3px;
+}
+
+.average {
+  font-size: 1.3rem;
+  position: relative;
+  top: 2px;
+  margin-right: 5px;
+}
+
+.fa-star {
+  margin-right: 5px;
+}
+
+.solid-star {
+  color: #e3c100;
+}
+
+.stars {
+  display: flex;
+}
+
+.location-pos {
+  position: relative;
+  width: 100%;
 }
 </style>

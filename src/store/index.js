@@ -148,28 +148,28 @@ const store = createStore({
       }
     },
     // eslint-disable-next-line no-empty-pattern
-    async externLoginCallback({ }, path) {
+    async externLoginCallback({}, path) {
       window.location.replace(
         process.env.VUE_APP_BUSINESS_URL +
-        path +
-        '?ext=true&access_token=' +
-        store.state.access_token +
-        '&refresh_token=' +
-        store.state.refresh_token
+          path +
+          '?ext=true&access_token=' +
+          store.state.access_token +
+          '&refresh_token=' +
+          store.state.refresh_token
       );
     },
     // eslint-disable-next-line no-empty-pattern
-    async internLoginCallback({ }, path) {
+    async internLoginCallback({}, path) {
       var p = '';
       if (path != undefined && path != null && path != '/') p = path;
 
       window.location.replace(
         process.env.VUE_APP_INTERN_URL +
-        p +
-        '?int=true&access_token=' +
-        store.state.access_token +
-        '&refresh_token=' +
-        store.state.refresh_token
+          p +
+          '?int=true&access_token=' +
+          store.state.access_token +
+          '&refresh_token=' +
+          store.state.refresh_token
       );
     },
     async signInAction({ commit }, { form, path }) {
@@ -206,18 +206,22 @@ const store = createStore({
       try {
         commit('setState', 'loading');
 
-        const splitBySpace = form.name.split(" ")
-        let formattedName = ""
+        const splitBySpace = form.name.split(' ');
+        let formattedName = '';
         for (let i = 0; i < splitBySpace.length; i++) {
-          let splitByHyphen = splitBySpace[i].split("-")
-          let subName = ""
+          let splitByHyphen = splitBySpace[i].split('-');
+          let subName = '';
           for (let j = 0; j < splitByHyphen.length; j++) {
-            if (splitByHyphen[j].toLowerCase() === "von") subName += "von-"
-            else if (splitByHyphen[j].toLowerCase() === "zu") subName += "zu-"
-            else subName += splitByHyphen[j].charAt(0).toUpperCase() + splitByHyphen[j].slice(1).toLowerCase() + "-";
+            if (splitByHyphen[j].toLowerCase() === 'von') subName += 'von-';
+            else if (splitByHyphen[j].toLowerCase() === 'zu') subName += 'zu-';
+            else
+              subName +=
+                splitByHyphen[j].charAt(0).toUpperCase() +
+                splitByHyphen[j].slice(1).toLowerCase() +
+                '-';
           }
           subName = subName.slice(0, subName.length - 1);
-          formattedName += subName + " "
+          formattedName += subName + ' ';
         }
         formattedName.slice(0, -1);
 
@@ -331,21 +335,23 @@ const store = createStore({
           .select()
           .or(
             'user_uid.eq.' +
-            this.getters.getUser.id +
-            ',employees.cs.' +
-            '{"' +
-            this.getters.getUser.email +
-            '"}'
+              this.getters.getUser.id +
+              ',employees.cs.' +
+              '{"' +
+              this.getters.getUser.email +
+              '"}'
           );
 
         if (error) throw error;
 
         let user = this.getters.getUser;
         user.hasCompany = false;
+        user.company_id = null;
         commit('setUser', user);
         if (data[0] == null) return;
 
         user.hasCompany = true;
+        user.company_id = data[0].id;
         commit('setUser', user);
       } catch (error) {
         console.log(error.error_description || error.message);
@@ -353,7 +359,7 @@ const store = createStore({
     },
 
     // eslint-disable-next-line no-empty-pattern
-    async addQRCodeCount({ }, id) {
+    async addQRCodeCount({}, id) {
       try {
         const { data, error } = await supabase
           .from('stats')

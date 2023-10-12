@@ -9,7 +9,7 @@
 
 <script>
 import NavBar from './components/NavBar';
-import SocialsFooter from '@/shared/components/SocialsFooter';
+import SocialsFooter from './components/SocialsFooter';
 import ShoppingCart from './components/ShoppingCart';
 import { useStore } from 'vuex';
 

@@ -85,7 +85,7 @@
         >
           <option value="relevance" selected>Sortieren</option>
           <option value="relevance">Relevanz</option>
-          <option value="review">Bewertung</option>
+          <option value="stars">Bewertung</option>
           <option value="name">Name</option>
         </select>
         <select
@@ -97,7 +97,7 @@
         >
           <option value="relevance" selected>Sortieren</option>
           <option value="price">Preis</option>
-          <option value="review">Bewertung</option>
+          <option value="stars">Bewertung</option>
           <option value="category">Kategorie</option>
           <option value="name">Name</option>
         </select>
@@ -172,11 +172,20 @@ export default {
         ];
 
         for (var i = 0; i < this.sortedShownItems.length; i++) {
-          console.log(this.sortedShownItems[i].categories[0]);
           this.sortedShownItems[i].category = categoryOrder.indexOf(
             this.sortedShownItems[i].categories[0]
           );
         }
+      } else if (this.sortBy == 'stars') {
+        var no_reviews = [];
+        var reviews = [];
+
+        this.sortedShownItems.forEach((item) => {
+          if (item.stars == 0) no_reviews.push(item);
+          else reviews.push(item);
+        });
+
+        this.sortedShownItems = reviews;
       }
 
       this.sortedShownItems.sort((a, b) => {
@@ -190,6 +199,14 @@ export default {
         else return 0;
       });
       if (this.dir == 'down') this.sortedShownItems.reverse();
+      if (this.sortBy == 'stars') {
+        this.sortedShownItems.reverse();
+
+        no_reviews.forEach((item) => {
+          this.sortedShownItems.push(item);
+        });
+      }
+
       return;
     },
     searchForString: function (string, object) {
@@ -270,7 +287,6 @@ export default {
       const select = document.getElementById('companySort');
       const value = select.value;
       this.sortBy = value;
-      console.log(value);
     },
     productSortChange() {
       const select = document.getElementById('productSort');

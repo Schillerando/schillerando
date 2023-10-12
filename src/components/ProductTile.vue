@@ -20,8 +20,15 @@
 
         <p class="price">{{ data.price }} $</p>
 
+        <div v-if="data.stars > 0" class="product-stars">
+          <div>
+            <span class="average">{{ data.stars }}</span>
+            <i class="fa-solid fa-star fa-xl solid-star"></i>
+          </div>
+        </div>
+
         <button
-          v-if="data.delivery"
+          v-if="data.delivery && false"
           class="btn btn-primary"
           @click="addProductToCart"
           type="button"
@@ -191,6 +198,32 @@ img {
   top: 50%;
   left: calc(50% - 2rem);
   color: black;
+}
+
+.product-stars {
+  position: absolute;
+  right: 0;
+  bottom: 9px;
+}
+
+.average {
+  color: black;
+  font-size: 1.3rem;
+  position: relative;
+  top: 2px;
+  margin-right: 5px;
+}
+
+.fa-star {
+  margin-right: 5px;
+}
+
+.solid-star {
+  color: #e3c100;
+}
+
+.stars {
+  display: flex;
 }
 
 /*   border-radius: 0.375rem 0 0 0.375rem; */
