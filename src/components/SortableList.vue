@@ -109,7 +109,7 @@
       <component
         :is="element"
         :data="ssItem"
-        :linkViaEvent="element === 'CompanyTile'"
+        :linkViaEvent="true"
         :show-category="this.showCategory"
         class="item"
       ></component>
@@ -145,6 +145,7 @@ export default {
       dir: 'up', //or 'down'
       directLinks: [],
       focus: false,
+      shuffledItems: [],
     };
   },
   props: [
@@ -157,9 +158,10 @@ export default {
   ],
   methods: {
     sort: function () {
+      console.log('Sort items', this.dir)
       this.sortedShownItems = this.shownItems;
-      this.shuffleArray(this.sortedShownItems);
       if (this.sortBy == '') {
+        if (this.dir == 'down') this.sortedShownItems.reverse();
         return;
       } else if (this.sortBy == 'category') {
         const categoryOrder = [
@@ -212,14 +214,16 @@ export default {
         return instances;
       }
       if (typeof object != 'string') return 0;
-      let match = object.match(new RegExp(string, 'gi'));
+      let object_norm = object.normalize('NFD').replace(/\p{Diacritic}/gu, '');
+      let string_norm = string.normalize('NFD').replace(/\p{Diacritic}/gu, '');
+      let match = object_norm.match(new RegExp(string_norm, 'gi'));
       if (match == null) return 0;
       return match.length;
     },
-    generateShownItems: function () {
+    generateShownItems: function (change = false) {
       let newShownItems = [];
-      for (let i = 0; i < this.items.length; i++) {
-        let item = this.items[i];
+      for (let i = 0; i < this.shuffledItems.length; i++) {
+        let item = this.shuffledItems[i];
         let matches = true;
         if (this.searchForString(this.searchString, item) == 0) matches = false;
         if (item.categories == null && this.chosenCategories.length != 0) {
@@ -238,14 +242,14 @@ export default {
         }
         if (matches) newShownItems.push(item);
       }
-      if (newShownItems != this.shownItems) {
+      if ((newShownItems != this.shownItems) || change) {
         this.shownItems = newShownItems;
         this.sort();
       }
     },
     generateCategories: function () {
-      for (let i = 0; i < this.items.length; i++) {
-        let item = this.items[i];
+      for (let i = 0; i < this.shuffledItems.length; i++) {
+        let item = this.shuffledItems[i];
         if (item.categories == null) continue;
         for (let j = 0; j < item.categories.length; j++) {
           let category = item.categories[j];
@@ -290,14 +294,13 @@ export default {
         200
       );
     },
-    shuffleArray(array) {
-      for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-      }
+    async shuffleArray(array) {
+      array.sort(() => 0.5 - Math.random());
+      this.shuffledItems = array
     },
   },
-  mounted() {
+  created() {
+    this.shuffleArray(this.items)
     if (this.sortByCategories) this.sortBy = 'category';
 
     this.generateCategories();
@@ -316,18 +319,19 @@ export default {
       this.directLinks = [];
       if (this.element == 'CompanyTile') {
         if (this.searchString.startsWith('/')) {
-          for (let i = 0; i < this.items.length; i++) {
+          for (let i = 0; i < this.shuffledItems.length; i++) {
             if (
-              this.items[i].alias !== undefined &&
-              this.items[i].alias.startsWith(this.searchString.substring(1))
+              this.shuffledItems[i].alias !== undefined &&
+              this.shuffledItems[i].alias.startsWith(this.searchString.substring(1))
             )
-              this.directLinks.push(this.items[i]);
+              this.directLinks.push(this.shuffledItems[i]);
           }
         }
       }
     },
     dir: function () {
-      this.generateShownItems();
+      console.log('[SortableList] Change direction')
+      this.generateShownItems(true);
     },
     sortBy: function () {
       this.generateShownItems();

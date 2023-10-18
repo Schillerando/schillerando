@@ -1,5 +1,6 @@
 <template>
-  <router-link :to="link" class="link">
+  <!--eslint-disable-next-line-->
+  <a :is="noLink ? 'span' : 'a'" @click="openLink" class="hover">
     <div class="card">
       <div class="image">
         <div v-if="this.image == null" class="no-image">
@@ -31,17 +32,17 @@
         </button>
       </div>
     </div>
-  </router-link>
+  </a>
 </template>
 
 <script>
 import router from '@/router';
 import { useStore } from 'vuex';
-import { supabase } from '../supabase';
+import { supabase } from '@/supabase';
 
 export default {
   name: 'ProductTile',
-  props: ['data', 'showCategory'],
+  props: ['data', 'showCategory', 'linkViaEvent'],
   setup() {
     const store = useStore();
 
@@ -71,10 +72,15 @@ export default {
         router.push({ path: 'auth', query: { redirect: 'angebote' } });
       this.store.commit('addProductToCart', this.data);
     },
-  },
-  computed: {
-    link() {
-      return `/${this.data.company.alias}/${this.data.id}`;
+    openLink() {
+      console.log('Company tile: link via event?', this.$props.linkViaEvent)
+      if (this.$props.linkViaEvent) {
+        history.pushState({}, null, process.env.VUE_APP_MAIN_URL + `/${this.data.company.alias}/${this.data.id}`)
+        const event = new CustomEvent('openProductDetailView', { detail: this.data.id });
+        document.dispatchEvent(event);
+      } else {
+        router.push(`/${this.data.company.alias}/${this.data.id}`);
+      }
     },
   },
 };

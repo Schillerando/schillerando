@@ -10,7 +10,7 @@ import AuthView from '../views/AuthView';
 import UpdatePasswordView from '../views/UpdatePasswordView';
 import AGBView from '../views/AGBView';
 //import CompanyDetailView from '../views/CompanyDetailView';
-import ProductDetailView from '../views/ProductDetailView';
+//import ProductDetailView from '../views/ProductDetailView';
 
 const routes = [
   {
@@ -75,7 +75,7 @@ const routes = [
   },
   {
     path: '/:company/:productid',
-    component: ProductDetailView,
+    component: ProductView,
     meta: {
       footer: false,
     },

@@ -49,7 +49,7 @@
       </div>
     </div>
 
-    <SortableList :items="companies" :loading="loading" element="CompanyTile" />
+    <SortableList v-if="!loading" :items="companies" :loading="loading" element="CompanyTile" />
     <div
       v-if="loading"
       class="spinner-border"

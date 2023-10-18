@@ -1,5 +1,8 @@
 <template>
   <div class="outer">
+    <button class="btn btn-primary back" @click="goBack">
+      <i class="fa-solid fa-arrow-left fa-xl"></i>
+    </button>
     <div
       v-if="this.product === undefined"
       class="spinner-border"
@@ -81,7 +84,7 @@ import { useStore } from 'vuex';
 
 export default {
   name: 'ProductDetailView',
-  props: ['companyuuid'],
+  props: ['companyuuid', 'productid'],
   setup() {
     const store = useStore()
 
@@ -96,11 +99,15 @@ export default {
     };
   },
   async mounted() {
-    if (this.$route.params.productid) {
+    let productid = undefined
+    if (this.$route.params.productid) productid = this.$route.params.productid
+    if (this.$props.productid) productid = this.$props.productid
+    console.log(productid, this.$props.productid, this.$route.params.productid)
+    if (productid) {
       const { data, error } = await supabase
         .from('products')
         .select(`*, company:companies(name, alias)`)
-        .eq('id', this.$route.params.productid);
+        .eq('id', productid);
       if (error != null) console.log(error);
       if (data === null || data.length === 0) {
         this.product = null;
@@ -124,7 +131,12 @@ export default {
       if (this.store.getters.getUser == null)
         this.$router.push({ path: 'auth', query: { redirect: this.$route.path } });
       this.store.commit('addProductToCart', this.product)
-    }
+    },
+    goBack() {
+      history.pushState({}, null, process.env.VUE_APP_MAIN_URL + '/angebote')
+      const event = new CustomEvent('dismissProductDetailView');
+      document.dispatchEvent(event);
+    },
   }
 };
 </script>
@@ -303,5 +315,15 @@ img {
   display: block;
   margin-left: auto;
   margin-right: auto;
+}
+
+.back {
+  z-index: 1500;
+  position: fixed;
+  top: 85px;
+  left: 10px;
+  border-radius: 100%;
+  height: 50px;
+  width: 50px;
 }
 </style>
