@@ -73,10 +73,12 @@
 
     <p>
       (1) Die angegebenen Preise entsprechen den Preisen des jeweiligen
-      Unternehmens. Es gitb keine Lieferkosten für Verbraucher. Die Fälligkeit
-      der Schuldsumme tritt mit Lieferung ein und ist bindend. Bei Rücktritt von
-      der Bestellung ist Schillerando nicht erstattungspflichtig und der
-      Verbraucher trägt die Kosten in voller Höhe.
+      Unternehmens. Es gibt keine Lieferkosten für Verbraucher, sofern die
+      Bestellung nur Produkte von einem Unternehmen enthält. Werden Produkte von
+      mehreren Unternehmen bestellt, fällt eine Liefergebühr von 5$ an. Die
+      Fälligkeit der Schuldsumme tritt mit Lieferung ein und ist bindend. Bei
+      Rücktritt von der Bestellung ist Schillerando nicht erstattungspflichtig
+      und der Verbraucher trägt die Kosten in voller Höhe.
 
       <br />
       <br />

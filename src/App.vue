@@ -3,7 +3,7 @@
     <NavBar :key="key" />
     <router-view></router-view>
     <SocialsFooter v-if="$route.meta.footer == null" />
-    <ShoppingCart v-if="$route.meta.ShoppingCart == null && false" />
+    <ShoppingCart v-if="$route.meta.shoppingCart == null" />
   </div>
 </template>
 

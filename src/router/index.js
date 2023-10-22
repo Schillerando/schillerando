@@ -9,6 +9,10 @@ import AccountView from '../views/AccountView';
 import AuthView from '../views/AuthView';
 import UpdatePasswordView from '../views/UpdatePasswordView';
 import AGBView from '../views/AGBView';
+import OrderView from '../views/OrderView';
+import OrderedView from '../views/OrderedView';
+import OrderDetailView from '../views/OrderDetailView';
+import OrderQRView from '../views/OrderQRView';
 import CompanyDetailView from '../views/CompanyDetailView';
 import ProductDetailView from '../views/ProductDetailView';
 
@@ -51,6 +55,26 @@ const routes = [
     },
   },
   {
+    path: '/order',
+    name: 'OrderView',
+    component: OrderView,
+    meta: {
+      requiresAuth: true,
+      footer: false,
+      shoppingCart: false,
+    },
+  },
+  {
+    path: '/ordered',
+    name: 'OrderedView',
+    component: OrderedView,
+    meta: {
+      requiresAuth: true,
+      footer: false,
+      shoppingCart: false,
+    },
+  },
+  {
     path: '/update-password',
     name: 'UpdatePasswordView',
     component: UpdatePasswordView,
@@ -80,6 +104,22 @@ const routes = [
       footer: false,
     },
   },
+  {
+    path: '/orders/:orderid',
+    component: OrderDetailView,
+    meta: {
+      requiresAuth: true,
+      footer: false,
+    },
+  },
+  {
+    path: '/orders/:orderid/qr',
+    component: OrderQRView,
+    meta: {
+      requiresAuth: true,
+      footer: false,
+    },
+  },
 ];
 
 const router = createRouter({
@@ -102,10 +142,10 @@ router.beforeEach((to, from, next) => {
     store.dispatch('addQRCodeCount', id);
     next({ path: paths[id - 1] });
   } else if (to.query.source !== undefined) {
-    let query = to.query
+    let query = to.query;
     store.dispatch('addQRCodeCount', to.query.source);
-    delete query.source
-    next({query: query});
+    delete query.source;
+    next({ query: query });
   } else if (to.path === '/' && user !== null) {
     //Logged in users get 'products' page as start-page
     next({ path: 'angebote' });
@@ -126,10 +166,14 @@ router.beforeEach((to, from, next) => {
     to.query.redirect.split('_')[0] === 'int'
   ) {
     store.dispatch('internLoginCallback', to.query.redirect.split('_')[1]);
-  }
-  else if (to.name === 'AuthView' && user !== null) {
-    next({ path: 'account' });
-  } else next();
+  } else if (to.name == 'AuthView' && user != null) next({ path: 'account' });
+  else if (
+    to.name == 'OrderView' &&
+    store.getters.getProductsInCart.length == 0
+  )
+    next({ path: 'produkte' });
+  else if (!requiresAuth && user != null) next();
+  else next();
 });
 
 export default router;

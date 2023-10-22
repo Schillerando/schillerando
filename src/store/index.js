@@ -12,6 +12,7 @@ const store = createStore({
     shoppingCart: [],
     access_token: null,
     refresh_token: null,
+    orders: [],
     registered: false,
   },
   mutations: {
@@ -27,6 +28,9 @@ const store = createStore({
     removeProductFromCart(state, payload) {
       state.shoppingCart.filter((product) => product.id != payload.id);
     },
+    setOrders(state, payload) {
+      state.orders = payload;
+    },
     setRegistered(state, payload) {
       state.registered = payload;
     },
@@ -40,6 +44,9 @@ const store = createStore({
     },
     getProductsInCart(state) {
       return state.shoppingCart;
+    },
+    getOrders(state) {
+      return state.orders;
     },
   },
   actions: {
@@ -69,6 +76,7 @@ const store = createStore({
           )
             this.dispatch('addToDatabase');
           this.dispatch('checkUserCompany');
+          this.dispatch('startOrderSubscription');
         }
       } catch (e) {
         commit('setUser', null);
@@ -357,7 +365,110 @@ const store = createStore({
         console.log(error.error_description || error.message);
       }
     },
+    async order({ commit }, order) {
+      var hasActiveOrder = false;
 
+      this.state.orders.forEach((order) => {
+        if (order.delivery_time == null) hasActiveOrder = true;
+      });
+
+      if (hasActiveOrder) {
+        commit('setState', 'failure');
+        return;
+      }
+
+      try {
+        commit('setState', 'loading');
+
+        const productIds = [];
+        order.products.forEach((product) => {
+          productIds.push(product.id);
+        });
+
+        const { error } = await supabase.from('orders').insert({
+          buyer: this.state.user.id,
+          deliver_to: order.deliver_to,
+          products: productIds,
+          order_price: order.totalPrice,
+          note: order.note,
+          payed: false,
+          delivered: false,
+          buyer_name: this.state.user.user_metadata.name,
+        });
+
+        if (error) throw error;
+
+        store.state.shoppingCart = [];
+        commit('setState', 'success');
+
+        router.replace('ordered');
+      } catch (error) {
+        commit('setState', 'failure');
+        console.log(error.error_description || error.message);
+      }
+    },
+    async startOrderSubscription({ commit }) {
+      try {
+        const { data, error } = await supabase
+          .from('orders')
+          .select()
+          .eq('buyer', this.state.user.id);
+
+        if (error != null) throw error;
+
+        commit('setOrders', data);
+
+        this.state.orders.sort((a, b) => {
+          var longA = a.day + a.order_time;
+          var longB = b.day + b.order_time;
+
+          return longA.localeCompare(longB);
+        });
+
+        const orderSubscription = supabase.channel('any').on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'orders',
+            filter: 'buyer=eq.' + this.state.user.id,
+          },
+          async (payload) => {
+            var orders = this.state.orders;
+
+            var index = orders.findIndex((order) => order.id == payload.new.id);
+
+            if (index != -1) orders[index] = payload.new;
+            else orders.push(payload.new);
+
+            if (error != null) throw error;
+
+            console.log('Database change received!', payload.new);
+            commit('setOrders', orders);
+
+            this.state.orders.sort((a, b) => {
+              var longA = a.day + a.order_time;
+              var longB = b.day + b.order_time;
+
+              return longA.localeCompare(longB);
+            });
+          }
+        );
+
+        orderSubscription.subscribe();
+      } catch (error) {
+        commit('setOrders', []);
+        console.log(error.error_description || error.message);
+      }
+    },
+
+    async stopOrderSubscription() {
+      try {
+        await supabase.removeAllChannels();
+      } catch (error) {
+        console.log(error.error_description || error.message);
+      }
+    },
     // eslint-disable-next-line no-empty-pattern
     async addQRCodeCount({}, id) {
       try {

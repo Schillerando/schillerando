@@ -32,7 +32,6 @@
           class="btn btn-primary"
           @click="addProductToCart"
           type="button"
-          disabled
         >
           <i class="fa-solid fa-cart-plus fa-lg"></i>
         </button>

@@ -168,35 +168,17 @@
           <div class="card">
             <div class="card-header">Bestellungen</div>
             <div class="card-body">
-              <p v-if="true">
+              <p v-if="orders.length == 0">
                 Hier siehst du später alle deine getätigten Bestellungen.
                 Bestellungen sind erst ab dem 23.10.2023 möglich.
               </p>
-
-              <div
-                v-else
-                class="order"
-                v-for="order in this.orders"
-                :key="order"
-              >
-                <div class="card d-flex">
-                  <div class="product-count" v-if="order.products != null">
-                    {{ order.products.length }}
-                    <i class="fa-solid fa-bag-shopping"></i>
-                  </div>
-                  <div class="product-count" v-else>
-                    0 <i class="fa-solid fa-bag-shopping"></i>
-                  </div>
-                  <div class="price">{{ order.order_price }} $</div>
-                  <div>
-                    {{ order.deliver_to }}
-                  </div>
-                  <div>
-                    {{ order.payed }}
-                  </div>
-                  <div>
-                    {{ order.delivered }}
-                  </div>
+              <div v-else>
+                <div class="order" v-for="order in this.orders" :key="order.id">
+                  <OrderTile :data="order" v-if="order.delivery_time == null" />
+                </div>
+                <h4 style="text-align: left; margin: 0 0 10px 10px">Letzte</h4>
+                <div class="order" v-for="order in this.orders" :key="order.id">
+                  <OrderTile :data="order" v-if="order.delivery_time != null" />
                 </div>
               </div>
             </div>
@@ -240,18 +222,19 @@ import { supabase } from '../supabase';
 import { useStore, mapGetters } from 'vuex';
 import { computed } from 'vue';
 import { Modal } from 'bootstrap/dist/js/bootstrap.bundle.js';
-import AlertPopup from '../components/AlertPopup.vue';
+import AlertPopup from '@/shared/components/AlertPopup.vue';
+import OrderTile from '@/components/OrderTile.vue';
 
 export default {
   name: 'AccountView',
   components: {
     AlertPopup,
+    OrderTile,
   },
   data() {
     return {
       isAccountEditing: false,
       saveAccountPressed: false,
-      orders: [],
       alertTitle: '',
       alertInfo: '',
       successAlertTitle: 'Erfolgreich',
@@ -269,9 +252,12 @@ export default {
 
     const userData = computed(() => store.state.user);
 
+    const orders = computed(() => store.state.orders);
+
     return {
       store,
       userData,
+      orders,
     };
   },
   watch: {
@@ -333,16 +319,6 @@ export default {
         alertModal.show();
       }
     },
-  },
-  async created() {
-    const { data, error } = await supabase
-      .from('orders')
-      .select()
-      .eq('buyer', this.userData.id);
-
-    if (error) throw error;
-
-    this.orders = data;
   },
   methods: {
     signOut() {
@@ -565,8 +541,8 @@ export default {
   margin: 0 auto;
 }
 
-.order .card div {
-  margin: 5px 10px;
+.order {
+  margin: 5px 10px 20px 10px;
 }
 
 .product-count {

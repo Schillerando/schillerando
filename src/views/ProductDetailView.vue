@@ -57,7 +57,6 @@
               class="btn btn-primary deliver-btn"
               @click="addProductToCart"
               type="button"
-              disabled
             >
               <div class="cart">Warenkorb</div>
               <i class="fa-solid fa-cart-plus fa-lg"></i>
@@ -191,7 +190,6 @@
 <script>
 import ReviewTile from '@/components/ReviewTile.vue';
 import { supabase } from '../supabase';
-import { useStore } from 'vuex';
 
 export default {
   name: 'ProductDetailView',
@@ -205,13 +203,6 @@ export default {
       anonym: false,
       reviews: [],
       product_stars: 0,
-    };
-  },
-  setup() {
-    const store = useStore();
-
-    return {
-      store,
     };
   },
   async mounted() {
@@ -312,6 +303,16 @@ export default {
       } catch (e) {
         console.log(e);
       }
+    },
+    addProductToCart() {
+      console.log(this.$route.path);
+
+      if (this.store.getters.getUser == null)
+        this.$router.push({
+          path: 'auth',
+          query: { redirect: this.$route.path },
+        });
+      this.store.commit('addProductToCart', this.product);
     },
   },
   components: { ReviewTile },
