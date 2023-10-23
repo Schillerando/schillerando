@@ -3,6 +3,7 @@
     v-if="showDetails !== null"
     class="overlay"
     :companyalias="showDetails"
+    :linkViaLink="false"
   />
   <div class="no-scroll">
     <TitleDiv title="Unternehmen" />

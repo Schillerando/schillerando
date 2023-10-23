@@ -79,7 +79,10 @@ export default {
         const event = new CustomEvent('openProductDetailView', { detail: this.data.id });
         document.dispatchEvent(event);
       } else {
-        router.push(`/${this.data.company.alias}/${this.data.id}`);
+        //router.go({path:`/${this.data.company.alias}/${this.data.id}`});
+        let link = document.createElement('a');
+        link.href = `/${this.data.company.alias}/${this.data.id}`
+        link.click();
       }
     },
   },

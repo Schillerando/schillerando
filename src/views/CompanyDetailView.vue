@@ -1,3 +1,4 @@
+
 <template>
   <div class="outer">
     <button class="btn btn-primary back" @click="goBack">
@@ -100,6 +101,7 @@
           v-if="products.length > 0"
           :items="products"
           :no-search="true"
+          :linkViaEvent="true"
           sort-by-categories="true"
           show-category="true"
           element="ProductTile"
@@ -115,6 +117,7 @@
 </template>
 
 <script>
+/* eslint-disable */
 import { supabase } from '@/supabase';
 import CompanyBadge from '@/shared/components/CompanyBadge.vue';
 import SortableList from '@/components/SortableList.vue';
@@ -122,7 +125,7 @@ import MapProvider from '@/components/MapProvider.vue';
 
 export default {
   name: 'CompanyDetailView',
-  props: ['companyuuid', 'companyalias'],
+  props: ['companyuuid', 'companyalias', 'linkViaLink'],
   components: { CompanyBadge, SortableList, MapProvider },
   data() {
     return {
@@ -212,6 +215,8 @@ export default {
   },
   methods: {
     goBack() {
+    	//if (!this.linkViaLink) {
+    	
       history.pushState(
         {},
         null,
@@ -219,6 +224,8 @@ export default {
       );
       const event = new CustomEvent('dismissDetailView');
       document.dispatchEvent(event);
+      //} else {
+      //}
     },
   },
 };

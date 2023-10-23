@@ -106,7 +106,14 @@
   </div>
   <div class="sortable-list" ref="sortableList">
     <div v-for="ssItem in sortedShownItems" v-bind:key="ssItem.id">
-      <component
+      <component v-if="linkViaEvent"
+        :is="element"
+        :data="ssItem"
+        :linkViaEvent="false"
+        :show-category="this.showCategory"
+        class="item"
+      ></component>
+      <component v-else
         :is="element"
         :data="ssItem"
         :linkViaEvent="true"
@@ -155,6 +162,7 @@ export default {
     'noSearch',
     'sortByCategories',
     'showCategory',
+    'linkViaEvent',
   ],
   methods: {
     sort: function () {
